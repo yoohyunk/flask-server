@@ -15,7 +15,7 @@ jobs:
         run: |
             poetry config virtualenvs.create true --local
             poetry config virtualenvs.in-project true --local
-      - uses: action/cache@v3
+      - uses: actions/cache@v3
         name: Reuse or regenerate virtual environment cache
         with:
             path: ./.venv
