@@ -25,4 +25,4 @@ jobs:
       - name: Install the project dependencies
         run: poetry install
       - name: 'Run the automated tests'
-        run: poe test
+        run: poetry run pytest
