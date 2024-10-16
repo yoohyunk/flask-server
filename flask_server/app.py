@@ -1,8 +1,6 @@
 from flask import Flask
 from flask_server.routes.todolist import todolist_bp
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from flask_server.db import db
 
 app = Flask(__name__)
 
