@@ -26,3 +26,5 @@ jobs:
         run: poetry install
       - name: 'Run the automated tests'
         run: poetry run pytest
+        env:
+          environment: test
