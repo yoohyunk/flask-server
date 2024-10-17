@@ -38,7 +38,7 @@ class TodoList:
 
     def remove(self, todo_id: str) -> None:
         # Remove a todo item
-        todo_to_delete = TodoModel.query.get(todo_id)
+        todo_to_delete = db.session.get(TodoModel, todo_id)
 
         if todo_to_delete:
             db.session.delete(todo_to_delete)
@@ -48,7 +48,7 @@ class TodoList:
         return False
 
     def edit(self, todo_id: str, new_name: str) -> None:
-        todo_to_edit = TodoModel.query.get(todo_id)
+        todo_to_edit = db.session.get(TodoModel, todo_id)
         if todo_to_edit:
             todo_to_edit.name = new_name
             db.session.commit()
@@ -56,7 +56,7 @@ class TodoList:
         return False
 
     def update_status(self, todo_id: str, is_done: bool) -> None:
-        todo_to_edit = TodoModel.query.get(todo_id)
+        todo_to_edit = db.session.get(TodoModel, todo_id)
         if todo_to_edit:
             todo_to_edit.is_done = is_done
             db.session.commit()
@@ -89,14 +89,14 @@ class TodoList:
 
     def get_todo_by_id(self, todo_id: str) -> dict:
         # Get a todo item by its id)
-        todo_item = TodoModel.query.get(todo_id)
+        todo_item = db.session.get(TodoModel, todo_id)
         completed = "completed" if todo_item.is_done == 1 else "not completed"
         if todo_item:
             return {
                 "Id" : todo_item.id,
                 "Todo" : todo_item.name,
                 "Description" : todo_item.description,
-                "completed" : completed
+                "Completed" : completed
             }
         return False
     
