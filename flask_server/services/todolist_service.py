@@ -1,79 +1,102 @@
 from typing import List, Literal, Optional, TypedDict
 import uuid
 import random
+from flask_server.models.todo_model import TodoModel
+from flask_server.db import db
 
 random.seed(123)
 
-def random_uuid():
-    return uuid.UUID(bytes=bytes(random.getrandbits(8) for _ in range(16)), version=4)
+# def random_uuid():
+#     return uuid.UUID(bytes=bytes(random.getrandbits(8) for _ in range(16)), version=4)
 
 class TodoItem(TypedDict):
-    todo_id: str
     name: str
     description: str
     is_done: bool
+    
 
-
-def create_todo_item(name: str, description: str) -> TodoItem:
-    todo_id = str(random_uuid())
-    return {
-        "todo_id": todo_id,
-        "name": name,
-        "description": description,
-        "is_done": False,
-        }
+# def create_todo_item(name: str, description: str) -> TodoItem:
+#     new_todo = TodoItem(name, description, False)
+#     return new_todo
+    
 
 
 
 class TodoList:
-    def __init__(self) -> None:
-        self.todos: List[TodoItem] = []
-
     def add(self, todo: str, description: Optional[str] = "") -> None:
-        # Create a new todo item
-        new_item = TodoItem(create_todo_item(todo, description))
-        self.todos.append(new_item)
+        
+        new_todo = TodoModel(
+            name = todo,
+            description = description,
+            is_done = False
+        )
+
+        db.session.add(new_todo)
+        db.session.commit()
+
         return True
 
     def remove(self, todo_id: str) -> None:
         # Remove a todo item
-        for todo in self.todos:
-            if todo["todo_id"] == todo_id:
-                self.todos.remove(todo)
-                return True
+        todo_to_delete = TodoModel.query.get(todo_id)
+
+        if todo_to_delete:
+            db.session.delete(todo_to_delete)
+            db.session.commit()
+            return True
+            
         return False
 
     def edit(self, todo_id: str, new_name: str) -> None:
-        # Edit a todo item
-        for i in self.todos:
-            if i["todo_id"] == todo_id:
-                i["name"] = new_name
-                return True
+        todo_to_edit = TodoModel.query.get(todo_id)
+        if todo_to_edit:
+            todo_to_edit.name = new_name
+            db.session.commit()
+            return True
         return False
 
     def update_status(self, todo_id: str, is_done: bool) -> None:
-        # Update the status of a todo item
-        for todo in self.todos:
-            if todo["todo_id"] == todo_id:
-                todo["is_done"] = is_done
-                return True
-        raise KeyError(f"Todo item with ID {todo_id} not found.")
+        todo_to_edit = TodoModel.query.get(todo_id)
+        if todo_to_edit:
+            todo_to_edit.is_done = is_done
+            db.session.commit()
+            return True
+        return False
 
     def get_todos(self, show_completed: Literal["open", "done", "all"]) -> dict:
         # Get all the todo items
         # can also filter by "open" = show all incomplete todos, "done" = show all completed todos, "all" = show all todos
-        
+
         if show_completed == "all":
-            return self.todos 
+            todos = TodoModel.query.all()
+            todo_list=[{
+                "Id" : todo.id,
+                "Todo" : todo.name,
+                "Description" : todo.description,
+                "completed" : "completed" if todo.is_done == 1 else "not completed" 
+            } for todo in todos]
+            return todo_list
 
         is_completed = True if show_completed == "done" else False
-        todo_list = [todo for todo in self.todos if todo["is_done"] == is_completed]
+        todos = TodoModel.query.filter_by(is_done=is_completed)
+        todo_list=[{
+            "Id" : todo.id,
+            "Todo" : todo.name,
+            "Description" : todo.description,
+            "completed" : "completed" if todo.is_done == 1 else "not completed" 
+        } for todo in todos]
         return todo_list
 
     def get_todo_by_id(self, todo_id: str) -> dict:
         # Get a todo item by its id)
-        for item in self.todos:
-            if item["todo_id"] == todo_id:
-                return item
+        todo_item = TodoModel.query.get(todo_id)
+        completed = "completed" if todo_item.is_done == 1 else "not completed"
+        if todo_item:
+            return {
+                "Id" : todo_item.id,
+                "Todo" : todo_item.name,
+                "Description" : todo_item.description,
+                "completed" : completed
+            }
         return False
     
