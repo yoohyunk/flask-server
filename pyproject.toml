@@ -24,6 +24,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poe.tasks]
-dev = "flask --debug run"
-test = "pytest"
 create_db = "python scripts/init_db.py"
+dev = "flask --debug run"
+test = "sh -c 'export FLASK_ENV=test && pytest'"
+test-watch = "sh -c 'export FLASK_ENV=test && ptw'"

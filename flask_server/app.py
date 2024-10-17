@@ -1,10 +1,13 @@
 from flask import Flask
 from flask_server.routes.todolist import todolist_bp
-from flask_server.db import db
+from flask_server.db import db, get_database_uri
+
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///todolist.db'
+database_uri = get_database_uri()
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
