@@ -1,5 +1,5 @@
 import pytest
-from  flask_server.services.todolist_service import TodoList
+from  flask_server.services.todo_service import TodoList
 from flask_server.db import db
 from flask_server.models.todo_model import TodoModel
 from flask_server.app import app

@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify,request
-from  ..services.todolist_service import TodoList
+from  ..services.todo_service import TodoList
 
 todolist_bp = Blueprint("todolist", __name__)
 
