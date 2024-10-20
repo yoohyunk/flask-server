@@ -1,6 +1,6 @@
 import pytest
 from flask_server.app import app
-from flask_server.routes.todolist import todos
+from flask_server.routes.todo import todos
 from flask_server.app import app
 from flask_server.db import db
 from flask_server.models.todo_model import TodoModel

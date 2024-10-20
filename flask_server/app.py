@@ -1,5 +1,5 @@
 from flask import Flask
-from flask_server.routes.todolist import todolist_bp
+from flask_server.routes.todo import todolist_bp
 from flask_server.db import db, get_database_uri
 
 
