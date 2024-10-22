@@ -7,12 +7,13 @@ from flask_server.db import db
 class ListModel(db.Model):
     __tablename__ = 'lists'
 
-    list_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
     name: Mapped[str]
-    # todoModel = relationship('TodoModel', back_populates='listModel', cascade='all, delete-orphan')
 
-    def __init__(self, name):
-        self.list_id = self.generate_list_id(name)
+    todos = db.relationship('TodoModel', back_populates='todo_list', cascade='all, delete-orphan')
+
+    def __init__(self, name: str):
+        self.id = self.generate_list_id(name)
         self.name = name
      
     def generate_list_id(self, name: str) -> str:
