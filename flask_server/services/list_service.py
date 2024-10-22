@@ -37,7 +37,7 @@ class List:
         lists = ListModel.query.all()
         if lists:
             all_lists=[{
-                    "Id" : list.list_id,
+                    "Id" : list.id,
                     "Name" : list.name
                 } for list in lists]
         

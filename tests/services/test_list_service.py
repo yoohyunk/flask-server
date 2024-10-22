@@ -27,7 +27,7 @@ def todoList():
 @pytest.fixture(name = "list_ids", scope = 'function')
 def get_todo_ids(lists):
     
-    ids = [list.list_id for list in ListModel.query.all()]
+    ids = [list.id for list in ListModel.query.all()]
     return ids
 
 
