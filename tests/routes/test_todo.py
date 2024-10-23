@@ -45,7 +45,7 @@ def get_todo_ids(todos, list_ids):
     return ids
 
 def test_get_todo_by_id(c, ids, list_ids):
-    response = c.get(f"/todos/getTodosById?list_id={list_ids[0]}&id={ids[0]}")
+    response = c.get(f"/lists/{list_ids[0]}/{ids[0]}")
     data = response.get_json()
     assert data['List name'] == 'test_list'
     assert data['Todo'] == 'test_route1'
@@ -53,15 +53,15 @@ def test_get_todo_by_id(c, ids, list_ids):
     assert response.status_code == 200 or response.status_code == 404
 
 def test_get_todos(c, list_ids):
-    response = c.get(f"/todos/getTodos?list_id={list_ids[0]}&status=all")
+    response = c.get(f"/lists/{list_ids[0]}?status=all")
     data = response.get_json()
-    assert len(data) == 3
+    assert len(data['Todos']) == 3
     assert response.status_code == 200 or response.status_code == 404
 
 def test_add_todo(c, list_ids):
-    response = c.post('/todos/addTodo', json = {'list_id' : list_ids[0], 'todo_item' : 'test_add', 'description' : 'test'})
+    response = c.post(f'/lists/{list_ids[0]}', json = {'todo_item' : 'test_add', 'description' : 'test'})
     assert response.status_code == 201
-    response = c.get(f"/todos/getTodos?list_id={list_ids[0]}&status=all")
+    response = c.get(f"/lists/{list_ids[0]}?status=all")
     data = response.get_json()
     assert len(data['Todos']) == 4
     assert data['List name'] == 'test_list'
@@ -69,23 +69,23 @@ def test_add_todo(c, list_ids):
     assert data['Todos'][3]['Description'] == 'test'
 
 def test_remove_todo(c, ids, list_ids):
-    response = c.delete("/todos/removeTodo", json = {'list_id' : list_ids[0],'todo_id' : ids[0]})
+    response = c.delete(f"/lists/{list_ids[0]}/{ids[0]}")
     assert response.status_code == 200
-    response = c.get(f"/todos/getTodos?list_id={list_ids[0]}&status=all")
+    response = c.get(f"/lists/{list_ids[0]}?status=all")
     data = response.get_json()
     assert len(data['Todos']) == 2
     assert ids[0] not in [todo['Id'] for todo in data['Todos']]
 
 def test_edit_todo(c, ids, list_ids):
-    response = c.patch("/todos/editTodo", json = {'list_id' : list_ids[0], 'todo_id' : ids[1], 'new_name' : 'test_edit'})
+    response = c.patch(f"/lists/{list_ids[0]}/{ids[0]}/name", json = {'new_name' : 'test_edit'})
     assert response.status_code == 200
-    response = c.get(f"/todos/getTodosById?list_id={list_ids[0]}&id={ids[1]}")
+    response = c.get(f"/lists/{list_ids[0]}/{ids[0]}")
     data = response.get_json()
     assert data['Todo'] == 'test_edit' 
 
 def test_update_status_todo(c, ids, list_ids):
-    response = c.patch("/todos/updateStatusTodo", json = {'list_id' : list_ids[0], 'todo_id' : ids[0], 'status' : True})
+    response = c.patch(f"/lists/{list_ids[0]}/{ids[0]}/status", json = {'status' : True})
     assert response.status_code == 200
-    response = c.get(f"/todos/getTodosById?list_id={list_ids[0]}&id={ids[0]}")
+    response = c.get(f"/lists/{list_ids[0]}/{ids[0]}")
     data = response.get_json()
     assert data['Completed'] == 'completed'

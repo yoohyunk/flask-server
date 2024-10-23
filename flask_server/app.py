@@ -12,7 +12,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
-app.register_blueprint(todolist_bp, url_prefix="/")
+app.register_blueprint(todolist_bp, url_prefix="/lists")
 
 
 @app.route("/")
