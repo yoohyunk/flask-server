@@ -4,6 +4,7 @@ from flask_server.routes.todo import todos
 from flask_server.app import app
 from flask_server.db import db
 from flask_server.models.todo_model import TodoModel
+from flask_server.models.list_model import ListModel
 
 
 
@@ -11,10 +12,14 @@ from flask_server.models.todo_model import TodoModel
 def seed_todolist():
     with app.app_context():
         db.create_all()
+        test_list = ListModel(name = 'test_list')
+        db.session.add(test_list)
+        db.session.commit()
+        print(test_list.id)
         seed_todos = [
-            TodoModel(name = "test_service1", description = "test", is_done = False),
-            TodoModel(name = "test_service2", description = "test", is_done = False),
-            TodoModel(name = "test_service3", description = "test", is_done = False)
+            TodoModel(name = "test_route1", description = "test", is_done = False, list_id = test_list.id),
+            TodoModel(name = "test_route2", description = "test", is_done = False, list_id = test_list.id),
+            TodoModel(name = "test_route3", description = "test", is_done = False, list_id = test_list.id)
         ]
         db.session.bulk_save_objects(seed_todos)
         db.session.commit()
@@ -28,52 +33,59 @@ def seed_todolist():
 def client(todos):
     return app.test_client()
 
-@pytest.fixture(name = "ids", scope = 'function')
-def get_todo_ids(todos):
-    
-    ids = [todo.id for todo in TodoModel.query.all()]
+@pytest.fixture(name = "list_ids", scope = 'function')
+def get_list_ids(todos):
+    ids = [todoList.id for todoList in ListModel.query.all()]
     return ids
 
-def test_get_todo_by_id(c, ids):
-    response = c.get(f"/todos/getTodosById?id={ids[0]}")
+@pytest.fixture(name = "ids", scope = 'function')
+def get_todo_ids(todos, list_ids):
+    
+    ids = [todo.id for todo in TodoModel.query.filter_by(list_id=list_ids[0]).all()]
+    return ids
+
+def test_get_todo_by_id(c, ids, list_ids):
+    response = c.get(f"/todos/getTodosById?list_id={list_ids[0]}&id={ids[0]}")
     data = response.get_json()
-    assert data['Todo'] == 'test_service1'
+    assert data['List name'] == 'test_list'
+    assert data['Todo'] == 'test_route1'
     assert data['Description'] == 'test'
     assert response.status_code == 200 or response.status_code == 404
 
-def test_get_todos(c):
-    response = c.get(f"/todos/getTodos?status=all")
+def test_get_todos(c, list_ids):
+    response = c.get(f"/todos/getTodos?list_id={list_ids[0]}&status=all")
     data = response.get_json()
     assert len(data) == 3
     assert response.status_code == 200 or response.status_code == 404
 
-def test_add_todo(c):
-    response = c.post('/todos/addTodo', json = {'todo_item' : 'test_add', 'description' : 'test'})
+def test_add_todo(c, list_ids):
+    response = c.post('/todos/addTodo', json = {'list_id' : list_ids[0], 'todo_item' : 'test_add', 'description' : 'test'})
     assert response.status_code == 201
-    response = c.get(f"/todos/getTodos?status=all")
+    response = c.get(f"/todos/getTodos?list_id={list_ids[0]}&status=all")
     data = response.get_json()
-    assert len(data) == 4
-    assert data[2]['Todo'] == 'test_service3'
-    assert data[2]['Description'] == 'test'
+    assert len(data['Todos']) == 4
+    assert data['List name'] == 'test_list'
+    assert data['Todos'][3]['Todo'] == 'test_add'
+    assert data['Todos'][3]['Description'] == 'test'
 
-def test_remove_todo(c, ids):
-    response = c.delete("/todos/removeTodo", json = {'todo_id' : ids[0]})
+def test_remove_todo(c, ids, list_ids):
+    response = c.delete("/todos/removeTodo", json = {'list_id' : list_ids[0],'todo_id' : ids[0]})
     assert response.status_code == 200
-    response = c.get(f"/todos/getTodos?status=all")
+    response = c.get(f"/todos/getTodos?list_id={list_ids[0]}&status=all")
     data = response.get_json()
-    assert len(data) == 2
-    assert ids[0] not in [todo['Id'] for todo in data]
+    assert len(data['Todos']) == 2
+    assert ids[0] not in [todo['Id'] for todo in data['Todos']]
 
-def test_edit_todo(c, ids):
-    response = c.patch("/todos/editTodo", json = {'todo_id' : ids[1], 'new_name' : 'test_edit'})
+def test_edit_todo(c, ids, list_ids):
+    response = c.patch("/todos/editTodo", json = {'list_id' : list_ids[0], 'todo_id' : ids[1], 'new_name' : 'test_edit'})
     assert response.status_code == 200
-    response = c.get(f"/todos/getTodosById?id={ids[1]}")
+    response = c.get(f"/todos/getTodosById?list_id={list_ids[0]}&id={ids[1]}")
     data = response.get_json()
     assert data['Todo'] == 'test_edit' 
 
-def test_update_status_todo(c, ids):
-    response = c.patch("/todos/updateStatusTodo", json = {'todo_id' : ids[0], 'status' : True})
+def test_update_status_todo(c, ids, list_ids):
+    response = c.patch("/todos/updateStatusTodo", json = {'list_id' : list_ids[0], 'todo_id' : ids[0], 'status' : True})
     assert response.status_code == 200
-    response = c.get(f"/todos/getTodosById?id={ids[0]}")
+    response = c.get(f"/todos/getTodosById?list_id={list_ids[0]}&id={ids[0]}")
     data = response.get_json()
     assert data['Completed'] == 'completed'
