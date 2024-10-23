@@ -1,19 +1,19 @@
 from flask import Blueprint, jsonify,request
 from  ..services.todo_service import TodoList
 
-todolist_bp = Blueprint("todolist", __name__)
+todo_bp = Blueprint("todolist", __name__)
 
 
 todos = TodoList()
 
-@todolist_bp.route("/<list_id>/<todo_id>", methods=["GET"])
+@todo_bp.route("/<list_id>/<todo_id>", methods=["GET"])
 def get_todo_by_id(list_id, todo_id):
     got_todo = todos.get_todo_by_id(list_id, todo_id)
     if not got_todo:
         return jsonify({"error" : "invalid id"})
     return got_todo
 
-@todolist_bp.route("/<list_id>", methods=["GET"])
+@todo_bp.route("/<list_id>", methods=["GET"])
 def get_todos(list_id):
   status = request.args.get("status", "all")
   if status in ["open", "done", "all"]:
@@ -23,7 +23,7 @@ def get_todos(list_id):
     'error' : "invalid request"
   }), 400
 
-@todolist_bp.route("/<list_id>", methods=["POST"])
+@todo_bp.route("/<list_id>", methods=["POST"])
 def add_todo(list_id):
     data = request.json
 
@@ -40,7 +40,7 @@ def add_todo(list_id):
 
     
 
-@todolist_bp.route("/<list_id>/<todo_id>", methods=["DELETE"])
+@todo_bp.route("/<list_id>/<todo_id>", methods=["DELETE"])
 def remove_todo(list_id, todo_id):
     was_deleted = todos.remove(list_id, todo_id)
 
@@ -49,7 +49,7 @@ def remove_todo(list_id, todo_id):
 
     return "deleted todo", 200
 
-@todolist_bp.route("/<list_id>/<todo_id>/name", methods=["PATCH"])
+@todo_bp.route("/<list_id>/<todo_id>/name", methods=["PATCH"])
 def edit_todo(list_id, todo_id):
     data = request.json
 
@@ -63,7 +63,7 @@ def edit_todo(list_id, todo_id):
     
     return "new name updated", 200
 
-@todolist_bp.route("/<list_id>/<todo_id>/status", methods=["PATCH"])
+@todo_bp.route("/<list_id>/<todo_id>/status", methods=["PATCH"])
 def update_status_todo(list_id, todo_id):
     data = request.json
 

@@ -33,7 +33,7 @@ def get_list_ids(lists):
 
 
 def test_add_list(c):
-    response = c.post(f'/lists', json = {'list_name' : 'test_add'})
+    response = c.post(f'/lists/', json = {'list_name' : 'test_add'})
     assert response.status_code == 201
     assert len(ListModel.query.all()) == 4
 
@@ -49,6 +49,6 @@ def test_edit_todo(c, list_ids):
     assert db.session.get(ListModel, list_ids[0]).name == 'test_edit'
 
 def test_get_lists(c):
-    response = c.get('/lists')
+    response = c.get('/lists/')
     assert response.status_code == 200
     assert len(ListModel.query.all()) == 3

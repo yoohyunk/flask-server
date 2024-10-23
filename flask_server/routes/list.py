@@ -5,7 +5,7 @@ list_bp = Blueprint("list", __name__)
 
 lists = List()
 
-@list_bp.route("", methods=["POST"])
+@list_bp.route("/", methods=["POST"])
 def add_list():
     data = request.json
     if "list_name" not in data:
@@ -40,7 +40,7 @@ def edit_list(list_id):
     return "new name updated", 200
 
 
-@list_bp.route("", methods=["GET"])
+@list_bp.route("/", methods=["GET"])
 def get_lists():
     got_all_lists = lists.get_all_lists()
     if not got_all_lists:
