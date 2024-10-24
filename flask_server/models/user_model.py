@@ -5,13 +5,13 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, ForeignKey
 
 
-class User(db.Model):
+class UserModel(db.Model):
     __table_name__ = 'users'
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)  
     name: Mapped[str]
 
-    def __init__(self, id: str, name: str):
+    def __init__(self, name: str):
         self.id = self.generate_user_id(name)
         self.name = name 
 
