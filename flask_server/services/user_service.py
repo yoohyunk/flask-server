@@ -9,6 +9,7 @@ class User:
         )
         db.session.add(new_user)
         db.session.commit()
+        return True
 
     def delete_user(self, user_id: str):
         user_to_delete = db.session.get(UserModel, user_id)

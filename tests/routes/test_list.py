@@ -50,5 +50,6 @@ def test_edit_todo(c, list_ids):
 
 def test_get_lists(c):
     response = c.get('/lists/')
+    data = response.get_json()
     assert response.status_code == 200
-    assert len(ListModel.query.all()) == 3
+    assert len(data) == 3
