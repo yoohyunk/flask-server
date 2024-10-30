@@ -3,6 +3,7 @@ import uuid
 import random
 from flask_server.models.todo_model import TodoModel
 from flask_server.models.list_model import ListModel
+from flask_server.models.user_list_model import UserListAssociationModel
 from flask_server.db import db
 
 random.seed(123)
@@ -24,9 +25,13 @@ class TodoItem(TypedDict):
 
 
 class TodoList:
-    def add(self, listId: str, todo: str, description: Optional[str] = "") -> None:
+    def add(self, userId: str, listId: str, todo: str, description: Optional[str] = "") -> None:
         
         list_exist = db.session.get(ListModel, listId)
+        ownership = UserListAssociationModel.query.filter_by(user_id = userId, list_id = listId).first()
+
+        if ownership is None:
+            return False
 
         if list_exist:
             new_todo = TodoModel(
@@ -43,9 +48,14 @@ class TodoList:
         
         return False
 
-    def remove(self, listId: str, todo_id: str) -> None:
+    def remove(self,userId:str, listId: str, todo_id: str) -> None:
         # Remove a todo item
         todo_to_delete = TodoModel.query.filter_by(list_id = listId, id = todo_id).first()
+        ownership = UserListAssociationModel.query.filter_by(user_id = userId, list_id = listId).first()
+
+        if ownership is None:
+            return False
+
 
         if todo_to_delete:
             db.session.delete(todo_to_delete)
@@ -54,26 +64,41 @@ class TodoList:
             
         return False
 
-    def edit(self,listId: str, todo_id: str, new_name: str) -> None:
+    def edit(self, userId: str, listId: str, todo_id: str, new_name: str) -> None:
         todo_to_edit = TodoModel.query.filter_by(list_id = listId, id = todo_id).first()
+        ownership = UserListAssociationModel.query.filter_by(user_id = userId, list_id = listId).first()
+
+        if ownership is None:
+            return False
+
         if todo_to_edit:
             todo_to_edit.name = new_name
             db.session.commit()
             return True
         return False
 
-    def update_status(self,listId: str, todo_id: str, is_done: bool) -> None:
+    def update_status(self, userId: str, listId: str, todo_id: str, is_done: bool) -> None:
         todo_to_edit = TodoModel.query.filter_by(list_id = listId, id = todo_id).first()
+        ownership = UserListAssociationModel.query.filter_by(user_id = userId, list_id = listId).first()
+
+        if ownership is None:
+            return False
+
         if todo_to_edit:
             todo_to_edit.is_done = is_done
             db.session.commit()
             return True
         return False
 
-    def get_todos(self, listId: str, show_completed: Literal["open", "done", "all"]) -> dict:
+    def get_todos(self, userId: str, listId: str, show_completed: Literal["open", "done", "all"]) -> dict:
         # Get all the todo items
         # can also filter by "open" = show all incomplete todos, "done" = show all completed todos, "all" = show all todos
         todoList = db.session.get(ListModel, listId)
+        ownership = UserListAssociationModel.query.filter_by(user_id = userId, list_id = listId).first()
+
+        if ownership is None:
+            return False
+
         if not todoList:
             return False
 
@@ -105,12 +130,22 @@ class TodoList:
             "Todos" : todo_list
             }
 
-    def get_todo_by_id(self, listId: str, todo_id: str) -> dict:
+    def get_todo_by_id(self, userId: str, listId: str, todo_id: str) -> dict:
         # Get a todo item by its id)
-        todo_item = TodoModel.query.filter_by(list_id = listId, id = todo_id).first()
+        ownership = UserListAssociationModel.query.filter_by(user_id = userId, list_id = listId).first()
+
+        if ownership is None:
+            return False
+
         todo_list = db.session.get(ListModel, listId)
-        completed = "completed" if todo_item.is_done == 1 else "not completed"
+        if todo_list is None:
+            return False 
+        
+        todo_item = TodoModel.query.filter_by(list_id = listId, id = todo_id).first()
+    
+        
         if todo_item:
+            completed = "completed" if todo_item.is_done == 1 else "not completed"
             return {
                 "List name" : todo_list.name,
                 "List id" : todo_item.list_id,
