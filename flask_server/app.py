@@ -17,6 +17,7 @@ app.register_blueprint(todo_bp, url_prefix="/lists")
 app.register_blueprint(list_bp, url_prefix="/lists")
 
 
+
 @app.route("/")
 def hello():
     return "Hello, World!"

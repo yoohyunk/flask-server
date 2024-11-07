@@ -1,6 +1,7 @@
 import hashlib
 import time
-from sqlalchemy.orm import Mapped, mapped_column
+from typing import List
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String
 from flask_server.db import db
 
@@ -9,8 +10,8 @@ class ListModel(db.Model):
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     name: Mapped[str]
-
     todos = db.relationship('TodoModel', back_populates='todo_list', cascade='all, delete-orphan')
+    owners: Mapped[List['UserListAssociationModel']] = relationship()
 
     def __init__(self, name: str):
         self.id = self.generate_list_id(name)
