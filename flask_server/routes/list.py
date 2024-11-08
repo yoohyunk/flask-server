@@ -26,7 +26,8 @@ def add_list():
 
 @list_bp.route("/<list_id>", methods=["DELETE"])
 def delete_list(list_id):
-    user = get_user()
+    jwtoken = request.headers.get("Authorization")
+    user = get_user(jwtoken)
     if user is None:
         return jsonify({'error' : 'user not found'}), 401
 
@@ -40,7 +41,8 @@ def delete_list(list_id):
 @list_bp.route("/<list_id>", methods=["PATCH"])
 def edit_list(list_id):
     data = request.json
-    user = get_user()
+    jwtoken = request.headers.get("Authorization")
+    user = get_user(jwtoken)
     if user is None:
         return jsonify({'error' : 'user not found'}), 401
 
@@ -57,7 +59,8 @@ def edit_list(list_id):
 
 @list_bp.route("/", methods=["GET"])
 def get_lists():
-    user = get_user()
+    jwtoken = request.headers.get("Authorization")
+    user = get_user(jwtoken)
     if user is None:
         return jsonify({'error' : 'user not found'}), 401
 
