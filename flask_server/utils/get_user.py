@@ -1,7 +1,6 @@
-# def get_user():
-#     return None
-    
-def get_user():
-    return {
-        'user_id' : 'aW5zbWlsZXByaWRlaW5kZWVkbWlzc2lvbmdyb3VuZGhhdG5lYXJieXJlZmVycmVwbGE='
-    }
+from flask_server.utils.jwt import verify_jwt   
+from typing import Optional
+
+
+def get_user(jwt: str) -> Optional[str]:
+    return verify_jwt(jwt)['user_email']

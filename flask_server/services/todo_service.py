@@ -1,12 +1,10 @@
 from typing import List, Literal, Optional, TypedDict
-import uuid
-import random
 from flask_server.models.todo_model import TodoModel
 from flask_server.models.list_model import ListModel
 from flask_server.models.user_list_model import UserListAssociationModel
 from flask_server.db import db
 
-random.seed(123)
+
 
 # def random_uuid():
 #     return uuid.UUID(bytes=bytes(random.getrandbits(8) for _ in range(16)), version=4)

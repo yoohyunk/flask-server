@@ -67,7 +67,7 @@ def test_delete_list_no_user(c, user_id_none, list_ids):
     response = c.delete(f'/lists/{list_ids[0]}')
     assert response.status_code == 401
 
-def test_delete_list_no_user(c, user_id, list_ids):
+def test_delete_list_no_list(c, user_id, list_ids):
     response = c.delete(f'/lists/n')
     assert response.status_code == 404
 
