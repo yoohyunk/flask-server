@@ -9,9 +9,8 @@ lists = ListService()
 @list_bp.route("/", methods=["POST"])
 def add_list():
     data = request.json
-
-    user = get_user()
-    print("USER IS", user)
+    jwtoken = request.headers.get("Authorization")
+    user = get_user(jwtoken)
     
     if user is None:
         return jsonify({'error' : 'user not found'}), 401
