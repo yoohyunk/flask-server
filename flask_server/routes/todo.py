@@ -9,7 +9,8 @@ todos = TodoList()
 
 @todo_bp.route("/<list_id>/<todo_id>", methods=["GET"])
 def get_todo_by_id(list_id, todo_id):
-    user = get_user()
+    jwtoken = request.headers.get("Authorization")
+    user = get_user(jwtoken)
     
     if user is None:
         return jsonify({'error' : 'user not found'}), 401
@@ -20,7 +21,8 @@ def get_todo_by_id(list_id, todo_id):
 
 @todo_bp.route("/<list_id>", methods=["GET"])
 def get_todos(list_id):
-    user = get_user()
+    jwtoken = request.headers.get("Authorization")
+    user = get_user(jwtoken)
     if user is None:
         return jsonify({'error' : 'user not found'}), 401
     
@@ -40,7 +42,8 @@ def get_todos(list_id):
 @todo_bp.route("/<list_id>", methods=["POST"])
 def add_todo(list_id):
     data = request.json
-    user = get_user()
+    jwtoken = request.headers.get("Authorization")
+    user = get_user(jwtoken)
     if user is None:
         return jsonify({'error' : 'user not found'}), 401
 
@@ -59,7 +62,8 @@ def add_todo(list_id):
 
 @todo_bp.route("/<list_id>/<todo_id>", methods=["DELETE"])
 def remove_todo(list_id, todo_id):
-    user = get_user()
+    jwtoken = request.headers.get("Authorization")
+    user = get_user(jwtoken)
     if user is None:
         return jsonify({'error' : 'user not found'}), 401
     was_deleted = todos.remove(user['user_id'], list_id, todo_id)
@@ -72,7 +76,8 @@ def remove_todo(list_id, todo_id):
 @todo_bp.route("/<list_id>/<todo_id>/name", methods=["PATCH"])
 def edit_todo(list_id, todo_id):
     data = request.json
-    user = get_user()
+    jwtoken = request.headers.get("Authorization")
+    user = get_user(jwtoken)
     if user is None:
         return jsonify({'error' : 'user not found'}), 401
     if "new_name" not in data:
@@ -88,7 +93,8 @@ def edit_todo(list_id, todo_id):
 @todo_bp.route("/<list_id>/<todo_id>/status", methods=["PATCH"])
 def update_status_todo(list_id, todo_id):
     data = request.json
-    user = get_user()
+    jwtoken = request.headers.get("Authorization")
+    user = get_user(jwtoken)
     if user is None:
         return jsonify({'error' : 'user not found'}), 401
 
