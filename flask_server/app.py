@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_server.routes.todo import todo_bp
 from flask_server.routes.list import list_bp
 from flask_server.routes.auth import user_bp
@@ -6,6 +7,7 @@ from flask_server.db import db, get_database_uri
 
 
 app = Flask(__name__)
+CORS(app)
 
 database_uri = get_database_uri()
 
