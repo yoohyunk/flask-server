@@ -37,7 +37,7 @@ def mock_get_user_none():
 
 @pytest.fixture(name = "user_id")
 def mock_get_user_valid():
-    with patch("flask_server.routes.list.get_user", return_value={"user_id": "Y2xpbWF0ZXdpdGhpbnRvb2toZWFkZWRmaWxsbXlzZWxmZm9ybWNvbW11bml0eWNhcGk="}) as mock:
+    with patch("flask_server.routes.list.get_user", return_value="Y2xpbWF0ZXdpdGhpbnRvb2toZWFkZWRmaWxsbXlzZWxmZm9ybWNvbW11bml0eWNhcGk=") as mock:
         yield mock
 
 @pytest.fixture(name = "list_service")
