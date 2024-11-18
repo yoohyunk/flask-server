@@ -28,4 +28,6 @@ class UserService:
         
         return create_jwt(user_email)
 
-   
+    def get_users(self):
+        users = UserModel.query.all()
+        return [user.email for user in users]

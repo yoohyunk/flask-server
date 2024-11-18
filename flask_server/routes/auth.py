@@ -1,6 +1,8 @@
 from flask_server.services.user_service import UserService
 from flask import Blueprint, jsonify, request
 
+from flask_server.utils.get_user import get_user
+
 user_bp = Blueprint("user", __name__)
 
 users = UserService()
@@ -36,3 +38,14 @@ def signin():
     return jsonify({
         "jwt" : jwt_created
         }), 200
+
+
+@user_bp.route("/users", methods=["GET"])
+def get_users():
+    jwtoken = request.headers.get("Authorization")
+    user = get_user(jwtoken)
+
+    
+    if user is None:
+        return jsonify({'error' : 'user not found'}), 401
+    return jsonify(users.get_users()), 200
