@@ -75,6 +75,19 @@ class TodoList:
             return True
         return False
 
+    def edit_description(self, userId: str, listId: str, todo_id: str, new_description: str) -> None:
+        todo_to_edit = TodoModel.query.filter_by(list_id = listId, id = todo_id).first()
+        ownership = UserListAssociationModel.query.filter_by(user_id = userId, list_id = listId).first()
+
+        if ownership is None:
+            return False
+
+        if todo_to_edit:
+            todo_to_edit.description = new_description
+            db.session.commit()
+            return True
+        return False
+
     def update_status(self, userId: str, listId: str, todo_id: str, is_done: bool) -> None:
         todo_to_edit = TodoModel.query.filter_by(list_id = listId, id = todo_id).first()
         ownership = UserListAssociationModel.query.filter_by(user_id = userId, list_id = listId).first()
@@ -154,3 +167,23 @@ class TodoList:
             }
         return False
     
+    def count_todos(self, userId: str, listId: str ,show_completed: Literal["open", "done", "all"]) -> int:
+        # Count the number of todos in a list
+        ownership = UserListAssociationModel.query.filter_by(user_id = userId, list_id = listId).first()
+
+        if ownership is None:
+            return False
+
+        todo_list = db.session.get(ListModel, listId)
+        if todo_list is None:
+            return False
+        
+        if show_completed == "all":
+            todos = TodoModel.query.filter_by(list_id = listId, is_done = False).all()
+            return len(todos)
+        
+        status = True if show_completed == "done" else False
+        todos = TodoModel.query.filter_by(list_id = listId, is_done = status).all()
+        return len(todos)
+
+        
