@@ -31,7 +31,7 @@ def get_todos(list_id):
         return jsonify({'error' : 'invalid status'}), 404
     
     todos_exist = todos.get_todos(user, list_id, status)
-    print(todos_exist)
+    
     if todos_exist:
         return jsonify(todos_exist)
 

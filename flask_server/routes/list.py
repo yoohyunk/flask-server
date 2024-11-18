@@ -83,7 +83,7 @@ def add_collaborator(list_id):
         return jsonify({ "error": "Bad request. JSON body needs 'collaborator_id'" }), 400
     
     was_added = lists.add_collaborator(user, data["collaborator_id"], list_id)
-    print(data["collaborator_id"])
+
     if not was_added:
         return jsonify({"error" : "list_id or collaborator_id doesn't exist"}), 404
     
@@ -99,7 +99,6 @@ def get_collaborators(list_id):
     got_collaborators = lists.get_all_collaborators(user, list_id)
     if not got_collaborators:
         return jsonify({'error' : 'there is no collaborator'}), 404
-    print("this is", got_collaborators)
     
     return jsonify(got_collaborators), 200
 
@@ -113,7 +112,7 @@ def get_admin(list_id):
     got_admin = lists.get_admin(user, list_id)
     if not got_admin:
         return jsonify({'error' : 'there is no admin'}), 404
-    print("this is", got_admin)
+    
     
     return jsonify(got_admin), 200
 
@@ -129,7 +128,7 @@ def add_admin(list_id):
         return jsonify({ "error": "Bad request. JSON body needs 'new_admin_id'" }), 400
     
     was_added = lists.add_admin(data["new_admin_id"], user, list_id)
-    print(data["new_admin_id"])
+    
     if not was_added:
         return jsonify({"error" : "list_id or new_admin_id doesn't exist"}), 404
     
