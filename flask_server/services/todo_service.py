@@ -1,4 +1,5 @@
 from typing import List, Literal, Optional, TypedDict
+from datetime import datetime
 from flask_server.models.todo_model import TodoModel
 from flask_server.models.list_model import ListModel
 from flask_server.models.user_list_model import UserListAssociationModel
@@ -20,11 +21,10 @@ class TodoItem(TypedDict):
 #     return new_todo
     
 
-
-
 class TodoList:
-    def add(self, userId: str, listId: str, todo: str, description: Optional[str] = "") -> None:
-        
+
+    def add(self, userId: str, listId: str, todo: str, start:Optional[datetime] ,due: Optional[datetime], description: Optional[str] = "") -> None:
+    
         list_exist = db.session.get(ListModel, listId)
         ownership = UserListAssociationModel.query.filter_by(user_id = userId, list_id = listId).first()
 
@@ -36,7 +36,9 @@ class TodoList:
                 list_id = listId,
                 name = todo,
                 description = description,
-                is_done = False
+                is_done = False,
+                start_date=start,
+                due_date=due
             )
 
             db.session.add(new_todo)
@@ -87,6 +89,19 @@ class TodoList:
             db.session.commit()
             return True
         return False
+    
+    def edit_due_date(self, userId: str, listId: str, todo_id: str, new_date: datetime) -> None:
+        todo_to_edit = TodoModel.query.filter_by(list_id = listId, id = todo_id).first()
+        ownership = UserListAssociationModel.query.filter_by(user_id = userId, list_id = listId).first()
+
+        if ownership is None:
+            return False
+
+        if todo_to_edit:
+            todo_to_edit.due_date = new_date
+            db.session.commit()
+            return True
+        return False
 
     def update_status(self, userId: str, listId: str, todo_id: str, is_done: bool) -> None:
         todo_to_edit = TodoModel.query.filter_by(list_id = listId, id = todo_id).first()
@@ -119,7 +134,9 @@ class TodoList:
                 "Id" : todo.id,
                 "Todo" : todo.name,
                 "Description" : todo.description,
-                "completed" : "completed" if todo.is_done == 1 else "not completed" 
+                "completed" : "completed" if todo.is_done == 1 else "not completed",
+                "StartDate" : todo.start_date.isoformat(),
+                "DueDate" : todo.due_date.isoformat()
             } for todo in todos]
             return {
                 "List name" : todoList.name,
@@ -133,8 +150,11 @@ class TodoList:
             "Id" : todo.id,
             "Todo" : todo.name,
             "Description" : todo.description,
-            "completed" : "completed" if todo.is_done == 1 else "not completed" 
+            "completed" : "completed" if todo.is_done == 1 else "not completed",
+            "StartDate" : todo.start_date.isoformat(),
+            "DueDate" : todo.due_date.isoformat()
         } for todo in todos]
+        print(todo_list)
         return {
             "List name" : todoList.name,
             "List id" : todoList.id,
@@ -163,7 +183,8 @@ class TodoList:
                 "Id" : todo_item.id,
                 "Todo" : todo_item.name,
                 "Description" : todo_item.description,
-                "Completed" : completed
+                "Completed" : completed,
+                "Due date" : todo_item.due_date
             }
         return False
     
