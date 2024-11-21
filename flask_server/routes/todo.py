@@ -1,5 +1,6 @@
+from datetime import datetime
 from flask import Blueprint, jsonify,request
-from  ..services.todo_service import TodoList
+from  flask_server.services.todo_service import TodoList
 from flask_server.utils.get_user import get_user
 
 todo_bp = Blueprint("todolist", __name__)
@@ -48,10 +49,17 @@ def add_todo(list_id):
     if user is None:
         return jsonify({'error' : 'user not found'}), 401
 
-    if "todo_item" not in data or "description" not in data:
+    if "todo_item" not in data or "description" not in data or "due_date" not in data or "start_date" not in data:
         return jsonify({ "error": "Bad request. JSON body needs 'todo_item' and 'description'" }), 400
+    
+    try:
+        due_date = datetime.fromisoformat(data["due_date"])  
+        start_date = datetime.fromisoformat(data["start_date"])
+    except ValueError:
+        return jsonify({"error": "Invalid date format. Use ISO 8601 (e.g., '2024-12-31T00:00:00')"}), 400
+
    
-    was_added = todos.add(user, list_id, data["todo_item"], data["description"])
+    was_added = todos.add(user, list_id, data["todo_item"], start_date, due_date, data["description"])
     if not was_added:
         return jsonify({
             'error' : 'list id not found'
@@ -107,6 +115,23 @@ def edit_description(list_id, todo_id):
         return jsonify({"error" : "list_id or todo_id doesn't exist"}), 404
     
     return "new description updated", 200
+
+@todo_bp.route("/<list_id>/<todo_id>/duedate", methods=["PATCH"])
+def edit_due_date(list_id, todo_id):
+    data = request.json
+    jwtoken = request.headers.get("Authorization")
+    user = get_user(jwtoken)
+    if user is None:
+        return jsonify({'error' : 'user not found'}), 401
+    if "new_due_date" not in data:
+        return jsonify({ "error" : "Bad request. JSON body needs 'new_due_date'"}), 400
+    
+    was_edited = todos.edit_due_date(user, list_id, todo_id, data["new_due_date"])
+
+    if not was_edited:
+        return jsonify({"error" : "list_id or todo_id doesn't exist"}), 404
+    
+    return "new due date updated", 200
 
 @todo_bp.route("/<list_id>/<todo_id>/status", methods=["PATCH"])
 def update_status_todo(list_id, todo_id):
